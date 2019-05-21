@@ -24,7 +24,8 @@ datasanitation_summary_statistics_percent_with_confints_select_one <- function(d
                          dependent.var,
                          independent.var,
                          datasanitation_question_not_sm,
-                         datasanitation_morethan_1_unique_dependent)
+                         datasanitation_morethan_1_unique_dependent,
+                         datasanitation_dependent_select_one)
 }
 
 
@@ -53,6 +54,8 @@ datasanitation_summary_statistics_percent_groups <- function(data,dependent.var,
                          datasanitation_morethan_1_unique_dependent,
                          datasanitation_morethan_1_unique_independent,
                          datasanitation_question_not_sm,
+                         datasanitation_independent_select_one,
+                         datasanitation_dependent_select_one,
                          datasanitation_dependent_max_unique,
                          datasanitation_independent_max_unique)
 }
@@ -87,7 +90,9 @@ datasanitation_hypothesistest_chisq<-function(data,dependent.var,independent.var
                          datasanitation_morethan_1_unique_independent,
                          datasanitation_independent_max_unique,
                          datasanitation_dependent_max_unique,
-                         datasanitation_morethan_1_record_per_independent_value
+                         datasanitation_morethan_1_record_per_independent_value,
+                         datasanitation_independent_select_one,
+                         datasanitation_dependent_select_one
 
   )
 
