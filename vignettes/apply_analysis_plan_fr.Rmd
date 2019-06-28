@@ -1,5 +1,5 @@
 ---
-title: "Running an analysis plan"
+title: "Exécuter un plan d'analyse"
 author: "Martin Barner"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
@@ -23,17 +23,17 @@ getwd()
 ```
 
 
-### Load package
+### Charger package
 ```{r,warning=FALSE,message=FALSE,error=FALSE}
 library(hypegrammaR)
 library(dplyr)
 ```
-### Prepare Inputs
+### Preparer les données
 
 
 
-### Load input
-For details please see <a href="input_formats.html">Input formats & loading files</a>
+### Charger les données
+Pour plus de details veuillez s'il-vous-plait regarder <a href="input_formats.html">Format d'entrée et charger fichiers</a>
 
 ```{r,warning=F,message=F,error=F}
 assessment_data<-load_data("../tests/testthat/testdata.csv")
@@ -66,7 +66,7 @@ analysisplan<-load_analysisplan("../tests/testthat/analysisplan.csv")
 
 ```
 
-### Run the analysis plan & save outputs as an html file
+### Exécuter le plan d'analyse et enregistrer les sorties sous forme de fichier html
 
 ```{r,eval = F}
 list_of_results<- assessment_data %>%   from_analysisplan_map_to_output(analysisplan = analysisplan,
@@ -76,7 +76,7 @@ list_of_results<- assessment_data %>%   from_analysisplan_map_to_output(analysis
   
 ```
 
-### Output as html
+### Sortie en html
 ```{r,eval = F}
 
 list_of_results %>% map_to_template(questionnaire = questionnaire,

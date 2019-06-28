@@ -1,0 +1,133 @@
+---
+title: "Example d'analyse"
+author: "Martin Barner"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Example Analysis}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r,include=F,echo=F}
+library(hypegrammaR)
+
+assessment_data<-load_data("../tests/testthat/testdata.csv")
+
+samplingframe<-load_samplingframe("../tests/testthat/test_samplingframe.csv")
+
+weights<-map_to_weighting(sampling.frame = samplingframe,
+                               data.stratum.column = "stratification",
+                               sampling.frame.population.column = "population",
+                               sampling.frame.stratum.column = "strata names",
+                               data = assessment_data)
+
+questionnaire<-load_questionnaire(data = assessment_data,
+                                             questions.file = "../tests/testthat/kobo questions.csv",
+                                             choices.file = "../tests/testthat/kobo choices.csv",
+                                  choices.label.column.to.use = "label::English"
+                                             )
+
+```
+
+
+
+
+
+# Aperçu des besoins
+
+Comment les besoins diffèrent-ils d'une région à l'autre? Nous examinerons cela par secteur
+
+## Santé
+
+```{r,include=F,warning=F,echo=F}
+
+
+case<-map_to_case(hypothesis.type = "group_difference",
+                  dependent.var.type = "numerical",
+                  independent.var.type = "categorical")
+
+
+result<-map_to_result(assessment_data,
+                      dependent.var = "health_need",
+                      independent.var = "region",
+                      case=case,
+                      weighting = weights,
+                      questionnaire = questionnaire)
+
+
+```
+
+
+```{r,warning=F,echo=F}
+
+vis<-result %>% map_to_labeled(questionnaire) %>% map_to_visualisation
+
+```
+
+```{r,include=F}
+label_pvalue <- function(x, digits = 3){
+  if (x < 10^-digits) return(paste('<', 10^-digits))
+  paste('=', round(x, digits))
+}
+
+```
+
+Il semble que les besoins en matière de santé diffèrent de manière significative (p `r label_pvalue (result $ $ hypothesis.test $ result $ p.value)`) entre les régions.
+Nous pouvons voir cela moins clairement dans un heatmap:
+
+
+```{r,warning=F,echo=F,message=F}
+vis<-result %>% map_to_labeled(questionnaire) %>% map_to_visualisation_heatmap
+vis
+```
+
+Et bien sûr, complètement illisible serait une table, mais:
+```{r,echo=F,asis=T,warning=FALSE}
+result %>% map_to_labeled(questionnaire) %>% map_to_table
+```
+
+## Expérimenté
+```{r,echo=F,asis=T,warning=FALSE}
+case<-map_to_case(hypothesis.type = 'group_difference',dependent.var.type = 'categorical',independent.var.type = 'categorical')
+design<-map_to_design(assessment_data,weighting_function = weights)
+
+
+
+sumstat<-map_to_summary_statistic(design,"hhexperienced","region",case = case,questionnaire = questionnaire)
+undebug(map_to_result)
+case
+edu1<-map_to_result(assessment_data,dependent.var = "hhexperienced",independent.var = 'region',case = case,questionnaire = questionnaire)
+
+
+lbld<-edu1 %>% map_to_labeled(questionnaire) 
+
+lbld %>% map_to_table
+
+vis<-edu1 %>% map_to_labeled(questionnaire) %>%  map_to_visualisation
+vis
+```
+
+```{r}
+
+map_to_result(assessment_data,"hhexperienced",
+              case=map_to_case('direct_reporting','categorical'),
+              questionnaire = questionnaire) %>% map_to_visualisation
+
+
+
+```
+
+
+
+
+
+
+
+
+

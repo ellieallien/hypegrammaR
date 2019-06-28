@@ -1,0 +1,182 @@
+---
+title: "Format d'entrée et chargement de"
+author: "Input formats & loading files"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Input formats & loading files}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+
+library(hypegrammaR)
+library(knitr)
+
+```
+# Notes générales
+
+
+> Vos données et votre questionnaire doivent être conformes à la sortie standard de style xml de kobo, sinon cela ne fonctionnera pas ou produira des résultats erronés.
+>
+> - en-têtes de colonne inchangés
+> - noms des questionnaires inchangés
+> - valeurs xml (NON étiquetées)
+> - Les questions select_multiple ont une colonne avec toutes les réponses concaténées (séparées par un espace "") et une colonne pour chaque réponse nommée [nom de la question]. [nom du choix]
+>
+> Votre base de sondage doit être au bon format:
+>
+
+Tous les fichiers d'entrée sont attendus en tant que fichiers csv.
+Vous devriez utiliser les fonctions hypegrammar `load _ * ()` pour charger les entrées.
+
+```{r,include = F,echo = F}
+data<-read.csv("../tests/testthat/testdata.csv")
+sf<-read.csv("../tests/testthat/test_samplingframe.csv")
+quest_q<-read.csv("../tests/testthat/kobo questions.csv")
+quest_c<-read.csv("../tests/testthat/kobo choices.csv")
+ap<-read.csv("../tests/testthat/analysisplan.csv")
+```
+
+# Composants d'une évaluation
+
+## Les données
+
+### Format attendu
+
+#### Exemple
+```{r,echo = F}
+head(data) %>% kable(format="html")
+```
+
+#### Conditions
+
+Il doit adhérer au format standard kobo xml
+- il ne doit pas contenir de valeurs étiquetées. En général, il est recommandé d'ajouter les étiquettes une fois l'analyse terminée.
+- il doit avoir une rangée unique pour les en-têtes de colonnes (inchangé à la sortie de kobo)
+- il peut contenir des colonnes supplémentaires qui ne figuraient pas dans le questionnaire initial. Il est recommandé d'ajouter de nouvelles variables en tant que lignes supplémentaires au questionnaire, en spécifiant le type de variable, les choix, etc.
+
+### Chargement
+
+#### Paramètres
+
+`load_data` ne prend qu'un seul argument` file`, le chemin du fichier csv.
+
+#### Exemple
+
+```{r}
+assessment_data<-load_data(file = "../tests/testthat/testdata.csv")
+```
+
+#### Ce que vous obtenez
+Le jeu de données en tant que data.frame
+
+
+
+
+## Les sampling frame(s):
+
+Ceci n'est nécessaire que si l'analyse doit être pondérée.
+
+### Format attendu
+
+#### Exemple
+
+```{r,echo = F}
+head(sf)%>% kable(format="html")
+```
+
+#### Conditions
+
+- doit avoir une ligne par strate; une colonne pour les chiffres de population; une colonne pour les noms de strates
+- Les valeurs dans la colonne avec les noms de strates doivent apparaître exactement identiques dans une colonne dans les données
+
+### Chargement
+
+#### Paramètres
+`load_samplingframe` ne prend qu'un seul argument` file`, le chemin d'accès au fichier csv.
+
+#### Exemple
+
+```{r}
+sampling_frame<-load_samplingframe(file = "../tests/testthat/test_samplingframe.csv")
+```
+
+#### Ce que vous obtenez
+la base de sondage en tant que data.frame
+
+## Le questionnaire
+
+### Format attendu
+
+#### Exemple
+
+La feuille "questions":
+
+```{r,echo = F}
+head(quest_q)%>% kable(format="html")
+```
+
+La feuille "choices":
+```{r,echo = F}
+head(quest_c)%>% kable(format="html")
+```
+
+#### Conditions
+
+- Les fichiers csv de choix et de questions doivent être des copies exactes des feuilles respectives sous la forme kobo xml (à l'exception des ajouts mentionnés ci-dessus.)
+
+### Chargement
+#### Paramètres
+- `data`: l'objet qui stocke les données chargées ci-dessus
+- `questions.file`: le chemin d'accès à la feuille de questions sous forme de fichier csv
+- `choices.file` le chemin d'accès à la feuille de choix en tant que fichier csv
+- `choices.label.column.to.use`: nom exact de la colonne contenant les étiquettes à utiliser. Vous pouvez ajouter une colonne supplémentaire avec des étiquettes personnalisées à votre feuille de choix si vous ne souhaitez pas utiliser les étiquettes de choix du questionnaire d'origine.
+
+#### Exemple
+
+```{r,warning=FALSE}
+
+questionnaire<-load_questionnaire(data = assessment_data,
+                                  questions.file = "../tests/testthat/kobo questions.csv",
+                                  choices.file = "../tests/testthat/kobo choices.csv",
+                                  choices.label.column.to.use = "label::English"
+                                  )
+
+```
+
+#### Ce que vous obtenez
+L'objet `questionnaire` contient un ensemble de fonctions permettant de rechercher des éléments dans le questionnaire. Vous n'avez pas besoin de les utiliser directement, mais au cas où vous le souhaiteriez, ceux-ci sont disponibles:
+
+```{r}
+kable(data.frame(`questionnaire functions` = names(questionnaire),check.names = F)) 
+```
+
+## Le plan d'analyse
+
+### Format attendu
+
+#### Exemple
+```{r,echo=F}
+kable(head(ap),format = "html")
+```
+#### Conditions
+
+### Chargement
+
+#### Paramètres
+`load_analysisplan` ne prend qu'un seul paramètre` file`, le chemin d'accès au fichier csv.
+
+#### Exemple
+```{r}
+analysisplan<-load_analysisplan(file="../tests/testthat/analysisplan.csv")
+```
+
+#### Ce que vous obtenez
+Le plan d'analyse en tant que data.frame
+
